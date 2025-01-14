@@ -1,5 +1,8 @@
 name: Update parent issue
 
+permissions:
+  issues: write
+
 env:
   ISSUE_STATE: pr_inprogress
   REMOVE_ISSUES: --remove-label pr_approved --remove-label pr_review
