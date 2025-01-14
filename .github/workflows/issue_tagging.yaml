@@ -1,0 +1,42 @@
+name: Update parent issue
+
+env:
+  ISSUE_STATE: pr_inprogress
+  REMOVE_ISSUES: --remove-label pr_approved --remove-label pr_review
+on:
+  pull_request_review:
+    types:
+      - submitted
+
+jobs:
+  update_parent_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get parent issues
+        shell: bash
+        run: echo PARENT_ISSUE=$(.github/workflows/get_parent_issue.sh) >> $GITHUB_ENV
+
+      - name: Fail when unable to find a parent issue
+        if: env.PARENT_ISSUE == ""
+        run: echo "Could not find a parent issue" && exit 1
+
+      - name: Determine if PR is approved
+        if: github.event.review.state == "APPROVED"
+        run: echo "PR is approved"
+        env:
+          ISSUE_STATE: pr_approved
+          REMOVE_ISSUES: --remove-label pr_inprogress --remove-label pr_review
+      
+      - name: Determine if PR is pending review
+        if: github.event.review.state == "PENDING"
+        run: echo "PR is pending review"
+        env:
+          ISSUE_STATE: pr_review
+          REMOVE_ISSUES: --remove-label pr_inprogress --remove-label pr_approved
+      
+      - name: Set parent issue state
+        run: > 
+          echo "Updating $PARENT_ISSUE to $ISSUE_STATE" &&
+          gh issue $PARENT_ISSUE $REMOVE_ISSUES --add-label=$ISSUE_STATE
+        
