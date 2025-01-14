@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get parent issues
         shell: bash
-        run: echo PARENT_ISSUE=$(.github/workflows/get_parent_issue.sh) >> $GITHUB_ENV
+        run: echo PARENT_ISSUE=$(.github/workflows/get_parent_issue.sh ${{ github.event.pullRequest.number }}) >> $GITHUB_ENV
 
       - name: Fail when unable to find a parent issue
         if: env.PARENT_ISSUE == ''
