@@ -26,7 +26,7 @@ jobs:
           echo PARENT_ISSUE=$(
           .github/workflows/get_parent_issue.sh
           ${{ github.repository }}
-          ${{ github.event.pull_request.number }}
+          ${{ github.event.event.pull_request.number }}
           ) >> $GITHUB_ENV
 
       - name: Fail when unable to find a parent issue
@@ -34,14 +34,14 @@ jobs:
         run: echo "Could not find a parent issue" && exit 1
 
       - name: Determine if PR is approved
-        if: github.event.review.state == 'APPROVED'
+        if: github.event.review.state == 'approved'
         run: echo "PR is approved"
         env:
           ISSUE_STATE: pr_approved
           REMOVE_ISSUES: --remove-label pr_inprogress --remove-label pr_review
       
       - name: Determine if PR is pending review
-        if: github.event.review.state == 'PENDING'
+        if: github.event.review.state == 'pending'
         run: echo "PR is pending review"
         env:
           ISSUE_STATE: pr_review
@@ -50,5 +50,5 @@ jobs:
       - name: Set parent issue state
         run: > 
           echo "Updating $PARENT_ISSUE to $ISSUE_STATE" &&
-          gh -R ${{ github.repository }} issue $PARENT_ISSUE $REMOVE_ISSUES --add-label=$ISSUE_STATE
+          gh -R ${{ github.repository }} issue edit $PARENT_ISSUE $REMOVE_ISSUES --add-label=$ISSUE_STATE
         
