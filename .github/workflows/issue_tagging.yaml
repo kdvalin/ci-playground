@@ -29,13 +29,13 @@ jobs:
           PR_NUMBER: ${{ github.event.issue.number }}
 
       - name: Get PR number on PR event
-        if: github.event_name == "pull_request_target"
+        if: github.event_name == 'pull_request_target'
         run: echo "Fetching from PR state"
         env:
           PR_NUMBER: ${{ github.event.number }}
 
       - name: Get parent issues
-        if: env.PR_NUMBER != "-1"
+        if: env.PR_NUMBER != '-1'
         shell: bash
         run: >
           echo PARENT_ISSUE=$(
@@ -44,11 +44,11 @@ jobs:
           ) >> $GITHUB_ENV
 
       - name: Fail when unable to find a parent issue
-        if: env.PR_NUMBER != "-1" && env.PARENT_ISSUE == ''
+        if: env.PR_NUMBER != '-1' && env.PARENT_ISSUE == ''
         run: echo "Could not find a parent issue" && exit 1
 
       - name: Get PR state
-        if: env.PR_NUMBER != "-1"
+        if: env.PR_NUMBER != '-1'
         run: >
           echo PR_STATUS=pr_$(
             gh pr view $PR_NUMBER --json reviewRequests,latestReviews | 
@@ -56,7 +56,7 @@ jobs:
           )
     
       - name: Set parent issue state
-        if: env.PR_NUMBER != "-1"
+        if: env.PR_NUMBER != '-1'
         run: > 
           echo "Updating $PARENT_ISSUE to $ISSUE_STATE" &&
           gh issue edit $PARENT_ISSUE $REMOVE_ISSUES --add-label=$PR_STATE
