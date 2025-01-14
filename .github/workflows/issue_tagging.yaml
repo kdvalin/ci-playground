@@ -50,11 +50,11 @@ jobs:
           echo PR_STATUS=pr_$(
             gh pr view $PR_NUMBER --json reviewRequests,latestReviews | 
             python .github/workflows/determine_status.py
-          )
+          ) >> $GITHUB_ENV
     
       - name: Set parent issue state
         if: env.PR_NUMBER != ''
         run: > 
-          echo "Updating $PARENT_ISSUE to $ISSUE_STATE" &&
+          echo "Updating $PARENT_ISSUE to $PR_STATE" &&
           gh issue edit $PARENT_ISSUE $REMOVE_ISSUES --add-label=$PR_STATE
         
