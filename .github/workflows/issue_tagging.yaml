@@ -41,7 +41,7 @@ jobs:
           ) >> $GITHUB_ENV
 
       - name: Fail when unable to find a parent issue
-        if: env.PR_NUMBER != ''
+        if: env.PR_NUMBER != '' && env.PARENT_ISSUE == ''
         run: echo "Could not find a parent issue" && exit 1
 
       - name: Get PR state
