@@ -6,50 +6,58 @@ env:
   ISSUE_STATE: pr_inprogress
   REMOVE_ISSUES: --remove-label pr_approved --remove-label pr_review
   GH_TOKEN: ${{ github.token }}
-on:
-  pull_request_review:
-    types:
-      - submitted
+  PR_NUMBER: "-1"
 
+on:
+  issue_comment:
+    types:
+      - created #GitHub doesn't separate out PR comments from issue comments
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - review_requested
 jobs:
   update_parent_issue:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: echo '${{ toJSON(github) }}' > thing.json
-      - uses: actions/upload-artifact@v4
-        with:
-          name: github.json
-          path: thing.json
-          retention-days: 5
+      - name: Get PR number on issue type
+        if: github.event_name == 'issue_comment' && github.event.issue.pull_request.url != ''
+        run: echo "Fetching from PR comment"
+        env:
+          PR_NUMBER: ${{ github.event.issue.number }}
+
+      - name: Get PR number on PR event
+        if: github.event_name == "pull_request_target"
+        run: echo "Fetching from PR state"
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+
       - name: Get parent issues
+        if: env.PR_NUMBER != "-1"
         shell: bash
         run: >
           echo PARENT_ISSUE=$(
           .github/workflows/get_parent_issue.sh
-          ${{ github.event.pull_request.number }}
+          $PR_NUMBER
           ) >> $GITHUB_ENV
 
       - name: Fail when unable to find a parent issue
-        if: env.PARENT_ISSUE == ''
+        if: env.PR_NUMBER != "-1" && env.PARENT_ISSUE == ''
         run: echo "Could not find a parent issue" && exit 1
 
-      - name: Determine if PR is approved
-        if: github.event.review.state == 'approved'
-        run: echo "PR is approved"
-        env:
-          ISSUE_STATE: pr_approved
-          REMOVE_ISSUES: --remove-label pr_inprogress --remove-label pr_review
-      
-      - name: Determine if PR is pending review
-        if: github.event.review.state == 'pending'
-        run: echo "PR is pending review"
-        env:
-          ISSUE_STATE: pr_review
-          REMOVE_ISSUES: --remove-label pr_inprogress --remove-label pr_approved
-      
+      - name: Get PR state
+        if: env.PR_NUMBER != "-1"
+        run: >
+          echo PR_STATUS=pr_$(
+            gh pr view $PR_NUMBER --json reviewRequests,latestReviews | 
+            python .github/workflows/determine_status.py
+          )
+    
       - name: Set parent issue state
+        if: env.PR_NUMBER != "-1"
         run: > 
           echo "Updating $PARENT_ISSUE to $ISSUE_STATE" &&
-          gh issue edit $PARENT_ISSUE $REMOVE_ISSUES --add-label=$ISSUE_STATE
+          gh issue edit $PARENT_ISSUE $REMOVE_ISSUES --add-label=$PR_STATE
         
