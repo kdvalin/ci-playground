@@ -16,7 +16,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get parent issues
         shell: bash
-        run: echo PARENT_ISSUE=$(.github/workflows/get_parent_issue.sh ${{ github.event.pullRequest.number }}) >> $GITHUB_ENV
+        run: >
+          echo PARENT_ISSUE=$(
+          .github/workflows/get_parent_issue.sh
+          ${{ github.repository }}
+          ${{ github.context.event.pullRequest.number }}
+          ) >> $GITHUB_ENV
 
       - name: Fail when unable to find a parent issue
         if: env.PARENT_ISSUE == ''
@@ -39,5 +44,5 @@ jobs:
       - name: Set parent issue state
         run: > 
           echo "Updating $PARENT_ISSUE to $ISSUE_STATE" &&
-          gh issue $PARENT_ISSUE $REMOVE_ISSUES --add-label=$ISSUE_STATE
+          gh -R ${{ github.repository }} issue $PARENT_ISSUE $REMOVE_ISSUES --add-label=$ISSUE_STATE
         
