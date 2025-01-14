@@ -52,5 +52,5 @@ jobs:
       - name: Set parent issue state
         run: > 
           echo "Updating $PARENT_ISSUE to $ISSUE_STATE" &&
-          gh -R ${{ github.repository }} issue edit $PARENT_ISSUE $REMOVE_ISSUES --add-label=$ISSUE_STATE
+          gh issue edit $PARENT_ISSUE $REMOVE_ISSUES --add-label=$ISSUE_STATE
         
