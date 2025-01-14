@@ -4,7 +4,7 @@ permissions: write-all
 
 env:
   ISSUE_STATE: pr_inprogress
-  REMOVE_ISSUES: --remove-label pr_approved --remove-label pr_review
+  REMOVE_ISSUES: --remove-label pr_approved --remove-label pr_review --remove-label pr_inprogress
   GH_TOKEN: ${{ github.token }}
 
 on:
@@ -55,6 +55,7 @@ jobs:
       - name: Set parent issue state
         if: env.PR_NUMBER != ''
         run: > 
-          echo "Updating $PARENT_ISSUE to $PR_STATE" &&
-          gh issue edit $PARENT_ISSUE $REMOVE_ISSUES --add-label=$PR_STATE
+          echo "Updating $PARENT_ISSUE to $PR_STATUS" &&
+          gh issue edit $PARENT_ISSUE $REMOVE_ISSUES && 
+          gh issue edit $PARENT_ISSUE --add-label=$PR_STATUS
         
