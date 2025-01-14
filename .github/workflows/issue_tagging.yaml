@@ -25,19 +25,15 @@ jobs:
       - name: Get PR number on issue type
         id: issue_comment
         if: github.event_name == 'issue_comment' && github.event.issue.pull_request.url != ''
-        run: echo "Fetching from PR comment" && echo ::set-output num=${{ github.event.issue.number }}
-        env:
-          PR_NUMBER: ${{ github.event.issue.number }}
+        run: echo "Fetching from PR comment" && echo "PR_NUM=${{ github.event.issue.number }}" >> "$GITHUB_ENV"
 
       - name: Get PR number on PR event
         id: pr_comment
         if: github.event_name == 'pull_request_target'
-        run: echo "Fetching from PR state" && echo ::set-output num=${{ github.event.number }}
-        env:
-          PR_NUMBER: ${{ github.event.number }}
+        run: echo "Fetching from PR state" && echo "PR_NUM=${{ github.event.number }}" >> "$GITHUB_ENV"
 
       - name: Get parent issues
-        if: steps.issue_comment.num != '' || steps.pr_comment.num != ''
+        if: env.PR_NUMBER != -1
         shell: bash
         run: >
           echo PARENT_ISSUE=$(
@@ -46,11 +42,11 @@ jobs:
           ) >> $GITHUB_ENV
 
       - name: Fail when unable to find a parent issue
-        if: steps.issue_comment.num != '' || steps.pr_comment.num != ''
+        if: env.PR_NUMBER != -1
         run: echo "Could not find a parent issue" && exit 1
 
       - name: Get PR state
-        if: steps.issue_comment.num != '' || steps.pr_comment.num != ''
+        if: env.PR_NUMBER != -1
         run: >
           echo PR_STATUS=pr_$(
             gh pr view $PR_NUMBER --json reviewRequests,latestReviews | 
@@ -58,7 +54,7 @@ jobs:
           )
     
       - name: Set parent issue state
-        if: steps.issue_comment.num != '' || steps.pr_comment.num != ''
+        if: env.PR_NUMBER != -1
         run: > 
           echo "Updating $PARENT_ISSUE to $ISSUE_STATE" &&
           gh issue edit $PARENT_ISSUE $REMOVE_ISSUES --add-label=$PR_STATE
