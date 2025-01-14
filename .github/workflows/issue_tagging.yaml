@@ -1,6 +1,8 @@
 name: Update parent issue
 
-permissions: write-all
+permissions:
+  issues: write
+  pull-requests: write
 
 env:
   ISSUE_STATE: pr_inprogress
