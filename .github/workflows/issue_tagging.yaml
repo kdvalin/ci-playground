@@ -24,12 +24,12 @@ jobs:
       - name: Get PR number on issue type
         id: issue_comment
         if: github.event_name == 'issue_comment' && github.event.issue.pull_request.url != ''
-        run: echo "Fetching from PR comment" && echo "PR_NUM=${{ github.event.issue.number }}" >> "$GITHUB_ENV"
+        run: echo "Fetching from PR comment" && echo "PR_NUMBER=${{ github.event.issue.number }}" >> "$GITHUB_ENV"
 
       - name: Get PR number on PR event
         id: pr_comment
         if: github.event_name == 'pull_request_target'
-        run: echo "Fetching from PR state" && echo "PR_NUM=${{ github.event.number }}" >> "$GITHUB_ENV"
+        run: echo "Fetching from PR state" && echo "PR_NUMBER=${{ github.event.number }}" >> "$GITHUB_ENV"
 
       - name: Get parent issues
         if: env.PR_NUMBER != ''
