@@ -27,7 +27,6 @@ jobs:
         run: >
           echo PARENT_ISSUE=$(
           .github/workflows/get_parent_issue.sh
-          ${{ github.repository }}
           ${{ github.event.pull_request.number }}
           ) >> $GITHUB_ENV
 
