@@ -14,13 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: echo "${{ github.event }}"
       - name: Get parent issues
         shell: bash
         run: >
           echo PARENT_ISSUE=$(
           .github/workflows/get_parent_issue.sh
           ${{ github.repository }}
-          ${{ github.context.event.pullRequest.number }}
+          ${{ github.event.pullRequest.number }}
           ) >> $GITHUB_ENV
 
       - name: Fail when unable to find a parent issue
