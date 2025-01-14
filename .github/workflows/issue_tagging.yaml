@@ -3,6 +3,7 @@ name: Update parent issue
 env:
   ISSUE_STATE: pr_inprogress
   REMOVE_ISSUES: --remove-label pr_approved --remove-label pr_review
+  GH_TOKEN: ${{ github.token }}
 on:
   pull_request_review:
     types:
