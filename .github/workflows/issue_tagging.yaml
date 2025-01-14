@@ -14,7 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: echo "${{ toJson(github) }}"
+      - run: echo "${{ toJSON(github) }}" > thing.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: github.json
+          path: thing.json
+          retention-days: 5
       - name: Get parent issues
         shell: bash
         run: >
