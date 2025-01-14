@@ -32,7 +32,7 @@ jobs:
         run: echo "Fetching from PR state" && echo "PR_NUM=${{ github.event.number }}" >> "$GITHUB_ENV"
 
       - name: Get parent issues
-        if: $PR_NUMBER != ''
+        if: env.PR_NUMBER != ''
         shell: bash
         run: >
           echo PARENT_ISSUE=$(
@@ -41,11 +41,11 @@ jobs:
           ) >> $GITHUB_ENV
 
       - name: Fail when unable to find a parent issue
-        if: $PR_NUMBER != ''
+        if: env.PR_NUMBER != ''
         run: echo "Could not find a parent issue" && exit 1
 
       - name: Get PR state
-        if: $PR_NUMBER != ''
+        if: env.PR_NUMBER != ''
         run: >
           echo PR_STATUS=pr_$(
             gh pr view $PR_NUMBER --json reviewRequests,latestReviews | 
@@ -53,7 +53,7 @@ jobs:
           )
     
       - name: Set parent issue state
-        if: $PR_NUMBER != ''
+        if: env.PR_NUMBER != ''
         run: > 
           echo "Updating $PARENT_ISSUE to $ISSUE_STATE" &&
           gh issue edit $PARENT_ISSUE $REMOVE_ISSUES --add-label=$PR_STATE
