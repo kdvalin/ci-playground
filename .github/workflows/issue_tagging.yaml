@@ -14,7 +14,8 @@ on:
 
 jobs:
   update_parent_issue:
-    permissions: write-all
+    permissions:
+      issues: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
