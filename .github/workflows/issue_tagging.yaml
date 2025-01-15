@@ -2,6 +2,9 @@ name: Verify PR has JIRA ticket and issue number
 
 on:
   pull_request:
+    types:
+      - opened
+      - edited
     branches:
       - main
 
