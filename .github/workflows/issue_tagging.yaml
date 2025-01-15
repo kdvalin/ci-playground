@@ -1,6 +1,7 @@
 name: Update parent issue
 
-permissions: write-all
+permissions:
+  issues: write
 
 env:
   ISSUE_STATE: pr_inprogress
@@ -9,30 +10,27 @@ env:
 
 on:
   issue_comment:
-    types:
-      - created #GitHub doesn't separate out PR comments from issue comments
   pull_request_target:
     types:
-      - opened
-      - edited
       - review_requested
+  pull_request_review:
+    types:
+      - submitted
 jobs:
   update_parent_issue:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Get PR number on issue type
-        id: issue_comment
-        if: github.event_name == 'issue_comment' && github.event.issue.pull_request.url != ''
-        run: echo "Fetching from PR comment" && echo "PR_NUMBER=${{ github.event.issue.number }}" >> "$GITHUB_ENV"
+        if: github.event_name == 'pull_request_review'
+        run: echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> "$GITHUB_ENV"
 
       - name: Get PR number on PR event
-        id: pr_comment
         if: github.event_name == 'pull_request_target'
-        run: echo "Fetching from PR state" && echo "PR_NUMBER=${{ github.event.number }}" >> "$GITHUB_ENV"
+        run: echo "PR_NUMBER=${{ github.event.number }}" >> "$GITHUB_ENV"
 
       - name: Get parent issues
-        if: env.PR_NUMBER != ''
         shell: bash
         run: >
           echo PARENT_ISSUE=$(
@@ -41,11 +39,10 @@ jobs:
           ) >> $GITHUB_ENV
 
       - name: Fail when unable to find a parent issue
-        if: env.PR_NUMBER != '' && env.PARENT_ISSUE == ''
+        if: env.PARENT_ISSUE == ''
         run: echo "Could not find a parent issue" && exit 1
 
       - name: Get PR state
-        if: env.PR_NUMBER != ''
         run: >
           echo PR_STATUS=pr_$(
             gh pr view $PR_NUMBER --json reviewRequests,latestReviews | 
@@ -53,7 +50,6 @@ jobs:
           ) >> $GITHUB_ENV
     
       - name: Set parent issue state
-        if: env.PR_NUMBER != ''
         run: > 
           echo "Updating $PARENT_ISSUE to $PR_STATUS" &&
           gh issue edit $PARENT_ISSUE $REMOVE_ISSUES && 
