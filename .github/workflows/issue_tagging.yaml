@@ -3,6 +3,7 @@ name: Verify group review
 on:
   pull_request:
     types:
+      - opened
       - labeled
 
 env:
