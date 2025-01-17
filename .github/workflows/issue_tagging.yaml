@@ -1,29 +1,18 @@
-name: Verify PR has JIRA ticket and issue number
+name: Verify group review
 
 on:
   pull_request:
     types:
-      - opened
-      - edited
-    branches:
-      - main
+      - labeled
 
-permissions:
-  contents: read
-  pull-requests: write # Need write to make comments
+env:
+  TARGET_LABEL: 'group_review_lgtm'
 
 jobs:
-  pr_issue_jira:
+  check_review_label:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          repository: redhat-performance/pr-requirements
-          path: pr-requirements
-          ref: v1.0.0
-      - uses: ./pr-requirements
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          jira_ticket: true
-          jira_project: RPOPC
-          jira_url: https://issues.redhat.com
+      - run: echo "::error Missing review label" && exit 1
+        if: "!contains(github.event.pull_request.labels.*.name, env.TARGET_LABEL)"
+      
+      - run: echo "Has review label"
