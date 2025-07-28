@@ -33,3 +33,5 @@ jobs:
         run: curl https://api.github.com/repos/${{ github.event.repository.full_name }}/pulls/${{ github.event.issue.number }} | jq -r '[.base.ref, .head.ref] | @csv'
       - name: Alt fetch PR details
         run: gh pr view ${{ github.event.issue.number }} --json baseRefName,headRefName
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
