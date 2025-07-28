@@ -4,16 +4,19 @@ on:
   pull_request:
     types:
       - opened
-      - labeled
+  issue_comment:
+    types:
+      - created
 
 env:
   TARGET_LABEL: 'group_review_lgtm'
 
 jobs:
-  check_review_label:
+  verify_issue_comment:
     runs-on: ubuntu-latest
+    if: github.event_name == 'issue_comment' && github.event.issue.pull_request != null && startsWith(github.event.comment.body, '/review')
     steps:
-      - run: echo "::error Missing review label" && exit 1
-        if: "!contains(github.event.pull_request.labels.*.name, env.TARGET_LABEL)"
-      
-      - run: echo "Has review label"
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Print out event path
+        run: echo $GITHUB_EVENT_PATH
