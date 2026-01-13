@@ -7,31 +7,10 @@ on:
   issue_comment:
     types:
       - created
-
-env:
-  TARGET_LABEL: 'group_review_lgtm'
-
 jobs:
   verify_issue_comment:
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: read
-      actions: read
-
-    if: github.event_name == 'issue_comment' && github.event.issue.pull_request != null && startsWith(github.event.comment.body, '/review')
+    container:
+      image: registry.access.redhat.com/ubi9-init
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.issue.pull_request.head.ref }}
-      - name: Print out event path
-        run: echo $GITHUB_EVENT_PATH
-      - name: Print out event file
-        run: cat $GITHUB_EVENT_PATH
-      - name: Get PR details
-        run: curl https://api.github.com/repos/${{ github.event.repository.full_name }}/pulls/${{ github.event.issue.number }} | jq -r '[.base.ref, .head.ref] | @csv'
-      - name: Alt fetch PR details
-        run: gh pr view ${{ github.event.issue.number }} --json baseRefName,headRefName
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: echo hello!
