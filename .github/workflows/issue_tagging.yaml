@@ -8,4 +8,6 @@ jobs:
     container:
       image: registry.access.redhat.com/ubi9-init
     steps:
+      - run: dnf install -y procps-ng
+      - run: ps -e
       - run: echo hello!
